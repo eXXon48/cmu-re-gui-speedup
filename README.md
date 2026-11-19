@@ -1,0 +1,46 @@
+# cmu-re-speedup (Speed-up)
+
+**A faster-feeling factory screen on the Mazda CMU150 (firmware 74.00.324A).**
+
+A background HMI mod. It changes no system file: `ui/main.js` runs inside the HMI at start-up
+(loaded by the Revised Store's `sdk.js`) and makes three run-time changes:
+
+1. **Screen-change animations.** Scales the `animation-duration` and `animation-delay` of the
+   `.Transitions_*` CSS rules. The setting is the new length of the longest stock transition
+   (600 ms); the others keep their stock proportion. Minimum 1 ms, so `animationend` still fires.
+2. **GUI log level.** Raises the global gate of the GUI logger. Calls below the gate return
+   before the stack capture and the native log write. Errors are always logged.
+3. **Message handler fix.** The stock MMUI WebSocket handler calls two helpers as methods that
+   exist only as global functions, so it throws and skips the rest of the message. The mod
+   defines them on the prototype. Does nothing if the firmware already has them.
+
+## Settings
+
+| Setting | Range | Default |
+|---|---|---|
+| Screen change time (ms) | 50–800, step 50 (600 = stock) | 300 |
+| GUI log level | Normal (stock) · Warning · Critical | Warning |
+| Message handler fix | on / off | on |
+
+Changes apply at the next HMI start.
+
+## Install / revert
+
+Install or uninstall it in the Revised Store (needs store 0.7.0.2 or later). Uninstall and
+restart: the HMI is back to stock, nothing to restore.
+
+## Test
+
+```sh
+sh test/run.sh    # manifest + hmi.json parse, ES5 grep, main.js against stub globals (node)
+```
+
+## Build
+
+```sh
+sh tools/mkpkg.sh <version> <path/to/rvp-pack> cmu-re-speedup-<version>.rvp
+```
+
+`rvp-pack` comes from the Revised Store repo and must support manifest `config`. Releases: push
+a `vN` tag on `main`, or a `dev/vN` tag on `develop` for a dev prerelease; CI packs the `.rvp`
+and attaches it to the GitHub release.

@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "name": "cmu-re-speedup",
+  "version": "0.0.0",
+  "author": "CMU-Revised",
+  "targetCMU": "74.00.324A",
+  "category": "System mods",
+  "description": "Makes the factory screen feel faster: shorter screen-change animations (you pick the time), fewer GUI log writes, and a fix for a message-handler error in the stock HMI. Changes nothing on the system: the tweaks run inside the HMI at start-up. Uninstall and restart to get the stock behaviour back.",
+  "minDaemon": "0.1.0",
+  "depends": "cmu-re-store (>= 0.7.0.2)",
+  "conflicts": "",
+  "restart": true,
+  "config": {
+    "fields": [
+      { "key": "anim_ms", "type": "range", "label": "Screen change time (ms)", "default": 300, "min": 50, "max": 800, "step": 50 },
+      { "key": "logs", "type": "select", "label": "GUI log level", "default": "warn",
+        "options": [ { "label": "Normal", "value": "info" }, { "label": "Warning", "value": "warn" }, { "label": "Critical", "value": "error" } ] },
+      { "key": "wsfix", "type": "switch", "label": "Message handler fix", "default": true }
+    ],
+    "outputs": [ { "template": "ui/conf.js.tpl", "path": "ui/conf.js" } ],
+    "apply": "none"
+  },
+  "files": [
+    { "live": "ui/hmi.json", "payload": "payload/ui/hmi.json", "mode": "0644", "owner": "1000:1000", "type": "new", "apply": "whole-file" },
+    { "live": "ui/main.js", "payload": "payload/ui/main.js", "mode": "0644", "owner": "1000:1000", "type": "new", "apply": "whole-file" },
+    { "live": "ui/conf.js.tpl", "payload": "payload/ui/conf.js.tpl", "mode": "0644", "owner": "1000:1000", "type": "new", "apply": "whole-file" }
+  ]
+}
