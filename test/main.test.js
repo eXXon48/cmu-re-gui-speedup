@@ -102,3 +102,36 @@ assert.strictEqual(S.gate("bogus"), 3);
 }
 
 console.log("main.test.js ok");
+
+// timer cleanup (UMP slides) scaled with the CSS, so it never fires mid-animation
+{
+  const seen = [];
+  const T = function () {};
+  T.prototype._setCleanupByTimer = function (ms) { seen.push([this.id, ms]); };
+  const e = env([]); e.Transitions = T;
+  const r = S.apply(conf({ animMs: 800 }), e);
+  assert.strictEqual(r.timer, true);
+  const t = new T(); t.id = "x";
+  t._setCleanupByTimer(400); t._setCleanupByTimer(500); t._setCleanupByTimer(0);
+  assert.deepStrictEqual(seen, [["x", 533], ["x", 667], ["x", 0]], "same factor as CSS, this kept, 0 stays 0");
+  assert.strictEqual(S.apply(conf(), env([])).timer, false, "no Transitions: skipped");
+}
+
+// start-up: the status line is logged before the gate goes up (info lines are dropped above it)
+{
+  let script = null, logged = null;
+  const levels = { __global__: 2 };
+  const head = { appendChild: (s) => { script = s; } };
+  const g = load({
+    document: { createElement: () => ({}), head, styleSheets: [] },
+    log: { _logLevels: levels },
+    RevisedHMI: { log: (m) => { logged = [m, levels.__global__]; } },
+  });
+  g.RevisedSpeedupConf = { animMs: 300, logs: "error", wsfix: true };
+  script.onload();
+  assert.ok(logged, "status line logged");
+  assert.strictEqual(logged[1], 2, "logged while the gate was still stock");
+  assert.ok(/gate=4/.test(logged[0]), logged[0]);
+  assert.strictEqual(levels.__global__, 4, "gate raised after logging");
+}
+console.log("main.test.js ok");

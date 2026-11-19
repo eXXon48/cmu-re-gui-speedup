@@ -8,6 +8,7 @@ A background HMI mod. It changes no system file: `ui/main.js` runs inside the HM
 1. **Screen-change animations.** Scales the `animation-duration` and `animation-delay` of the
    `.Transitions_*` CSS rules. The setting is the new length of the longest stock transition
    (600 ms); the others keep their stock proportion. Minimum 1 ms, so `animationend` still fires.
+   The timer that ends the slide transitions is scaled by the same factor.
 2. **GUI log level.** Raises the global gate of the GUI logger. Calls below the gate return
    before the stack capture and the native log write. Errors are always logged.
 3. **Message handler fix.** The stock MMUI WebSocket handler calls two helpers as methods that

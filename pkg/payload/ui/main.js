@@ -1,6 +1,7 @@
 /* cmu-re-speedup: background HMI mod (ES5, Opera/Presto 12).
  * Loaded by the store's sdk.js at HMI start, after the GUI framework is up.
- * 1. scales the screen-transition CSS animations (.Transitions_* rules)
+ * 1. scales the screen-transition CSS animations (.Transitions_* rules) and, by the same factor,
+ *    the timer-based cleanup of UMP slides (else it fires mid-animation above 600 ms)
  * 2. raises the GUI log gate (log._logLevels.__global__)
  * 3. defines Websockets.prototype._isStack/_delStack, which the stock handler calls as methods
  * Nothing is written to disk; uninstall + HMI restart = stock behaviour. */
@@ -76,12 +77,24 @@
     return true;
   }
 
+  function scaleCleanupTimer(T, animMs) {
+    var p = T && T.prototype, orig = p && p._setCleanupByTimer;
+    if (typeof orig !== "function") return false;
+    p._setCleanupByTimer = function (ms) { return orig.call(this, scaleMs(ms, animMs)); };
+    return true;
+  }
+
+  function setGate(log, name) {
+    if (!log || !log._logLevels) return 0;
+    log._logLevels.__global__ = gate(name);
+    return gate(name);
+  }
+
   function apply(conf, env) {
-    var c = clean(conf), out = { anim: 0, logs: 0, wsfix: false };
+    var c = clean(conf), out = { anim: 0, timer: false, logs: 0, wsfix: false };
     try { out.anim = scaleAnimations(env.document, c.animMs); } catch (e) { out.anim = -1; }
-    try {
-      if (env.log && env.log._logLevels) { env.log._logLevels.__global__ = gate(c.logs); out.logs = gate(c.logs); }
-    } catch (e2) { out.logs = -1; }
+    try { out.timer = scaleCleanupTimer(env.Transitions, c.animMs); } catch (e1) { out.timer = false; }
+    try { out.logs = setGate(env.log, c.logs); } catch (e2) { out.logs = -1; }
     try { out.wsfix = c.wsfix && !!env.Websockets && fixWebsockets(env.Websockets.prototype); } catch (e3) { out.wsfix = false; }
     return out;
   }
@@ -94,8 +107,11 @@
       if (done) return;
       done = true;
       var c = clean(w.RevisedSpeedupConf);
-      var r = apply(c, { document: w.document, log: w.log, Websockets: w.Websockets });
-      w.RevisedHMI.log("speedup anim=" + r.anim + " rules (" + c.animMs + " ms), gate=" + r.logs + ", wsfix=" + r.wsfix);
+      // gate last: RevisedHMI.log writes at info level, which the raised gate drops
+      var r = apply(c, { document: w.document, Transitions: w.Transitions, Websockets: w.Websockets });
+      w.RevisedHMI.log("speedup anim=" + r.anim + " rules (" + c.animMs + " ms), timer=" + r.timer +
+        ", gate=" + gate(c.logs) + ", wsfix=" + r.wsfix);
+      try { setGate(w.log, c.logs); } catch (e) {}
     }
     var s = w.document.createElement("script");
     s.src = CONF_SRC;
