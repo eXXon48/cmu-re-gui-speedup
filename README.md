@@ -61,3 +61,19 @@ Local HMI sim (desktop Opera 12.10, Presto 2.12.388, stock-HMI stub), 2026-11-19
 
 The sim has no stock transition CSS, GUI logger or MMUI WebSocket, so the real rule count and
 the timing numbers come from the bench.
+
+Bench unit (74.00.324A EU, store 0.7.0.2, v0.1.0 from the dev catalog), 2026-11-20:
+
+- Status line at HMI start: `speedup anim=47 rules (300 ms), timer=true, gate=3, wsfix=false`.
+- Timing: 10 enter/back pairs on Communication from the home screen, start of
+  `doTemplateTransition` to `_transitionCompleted`; the transition watchdog never fired.
+
+| Setting | Fadeover (enter), median | Crossfade (back), median |
+|---|---|---|
+| Stock (before) | 230 ms (222–242) | 638 ms (626–650) |
+| 300 ms (default) | 135 ms (125–163), -41 % | 338 ms (327–362), -47 % |
+| 50 ms | 32 ms (32–39), -86 % | 105.5 ms (97–119), -83 % |
+| Stock (after uninstall) | 229 ms (220–239) | 629 ms (623–646) |
+
+- After uninstall and a restart: log gate 2, no mod global, stock rule values, no status line
+  in the HMI log.
