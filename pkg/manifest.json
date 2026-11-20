@@ -14,8 +14,7 @@
     "fields": [
       { "key": "anim_ms", "type": "range", "label": "Screen change time (ms)", "default": 300, "min": 50, "max": 800, "step": 50 },
       { "key": "logs", "type": "select", "label": "GUI log level", "default": "warn",
-        "options": [ { "label": "Normal", "value": "info" }, { "label": "Warning", "value": "warn" }, { "label": "Critical", "value": "error" } ] },
-      { "key": "wsfix", "type": "switch", "label": "Message handler fix", "default": true }
+        "options": [ { "label": "Normal", "value": "info" }, { "label": "Warning", "value": "warn" }, { "label": "Critical", "value": "error" } ] }
     ],
     "outputs": [ { "template": "ui/conf.js.tpl", "path": "ui/conf.js" } ],
     "apply": "none"

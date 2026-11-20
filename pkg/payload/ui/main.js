@@ -3,7 +3,7 @@
  * 1. scales the screen-transition CSS animations (.Transitions_* rules) and, by the same factor,
  *    the timer-based cleanup of UMP slides (else it fires mid-animation above 600 ms)
  * 2. raises the GUI log gate (log._logLevels.__global__)
- * 3. defines Websockets.prototype._isStack/_delStack, which the stock handler calls as methods
+ * 3. (disabled) defines Websockets.prototype._isStack/_delStack, which the stock handler calls as methods
  * Nothing is written to disk; uninstall + HMI restart = stock behaviour. */
 (function (w) {
   var STOCK_MAX_MS = 600;   // longest stock transition (Crossfade); anim_ms is its new length
@@ -95,7 +95,8 @@
     try { out.anim = scaleAnimations(env.document, c.animMs); } catch (e) { out.anim = -1; }
     try { out.timer = scaleCleanupTimer(env.Transitions, c.animMs); } catch (e1) { out.timer = false; }
     try { out.logs = setGate(env.log, c.logs); } catch (e2) { out.logs = -1; }
-    try { out.wsfix = c.wsfix && !!env.Websockets && fixWebsockets(env.Websockets.prototype); } catch (e3) { out.wsfix = false; }
+    // ponytail: wsfix disabled, no _isStack TypeError seen on the bench; re-enable if the HMI log shows them
+    // try { out.wsfix = c.wsfix && !!env.Websockets && fixWebsockets(env.Websockets.prototype); } catch (e3) { out.wsfix = false; }
     return out;
   }
 

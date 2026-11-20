@@ -11,9 +11,10 @@ A background HMI mod. It changes no system file: `ui/main.js` runs inside the HM
    The timer that ends the slide transitions is scaled by the same factor.
 2. **GUI log level.** Raises the global gate of the GUI logger. Calls below the gate return
    before the stack capture and the native log write. Errors are always logged.
-3. **Message handler fix.** The stock MMUI WebSocket handler calls two helpers as methods that
-   exist only as global functions, so it throws and skips the rest of the message. The mod
-   defines them on the prototype. Does nothing if the firmware already has them.
+3. **Message handler fix (disabled).** The stock MMUI WebSocket handler calls two helpers as
+   methods that exist only as global functions, so it can throw and skip the rest of the
+   message. The fix (define them on the prototype) is in the code but switched off: the bench
+   unit logged no such error. It comes back if the HMI log shows them.
 
 ## Settings
 
@@ -21,7 +22,6 @@ A background HMI mod. It changes no system file: `ui/main.js` runs inside the HM
 |---|---|---|
 | Screen change time (ms) | 50–800, step 50 (600 = stock) | 300 |
 | GUI log level | Normal (stock) · Warning · Critical | Warning |
-| Message handler fix | on / off | on |
 
 Changes apply at the next HMI start.
 
@@ -54,7 +54,7 @@ Local HMI sim (desktop Opera 12.10, Presto 2.12.388, stock-HMI stub), 2026-11-19
 - Presto accepts `style.setProperty("animation-duration", "150ms")` on a `CSSStyleRule` and
   reads the value back in seconds (`0.15s`); no fallback sheet needed. Test rules scaled at
   300 ms: `300ms → 150ms`, `0.6s → 300ms`, delay `0ms` stays `0`.
-- Log gate set to 3; `_isStack`/`_delStack` defined and working on a test prototype.
+- Log gate set to 3.
 - Settings change (50 ms / Critical / fix off) regenerates `conf.js`; the next page start
   reads the new values.
 - Uninstall removes the jail and the registry entry; the next page start has no mod globals.

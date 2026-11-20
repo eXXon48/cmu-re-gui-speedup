@@ -66,36 +66,20 @@ assert.strictEqual(S.gate("bogus"), 3);
   assert.strictEqual(lv.__global__, 4);
 }
 
-// wsfix: helpers defined with stock semantics; existing ones untouched; switch off = untouched
+// wsfix is disabled (no _isStack TypeError seen on the bench): apply never touches Websockets
 {
-  const g = load();
-  const proto = {};
-  const r = g.RevisedSpeedup.apply(conf(), env([], null, proto));
-  assert.strictEqual(r.wsfix, true);
-  const ws = Object.create(proto);
-  ws._waitMsgArray = [["focusStack", 7], ["transition", 7]];
-  assert.strictEqual(ws._isStack("focusStack", 7), true);
-  assert.strictEqual(g.mStackOutput, "focusStack");
-  assert.strictEqual(ws._isStack("focusStack", 8), false);
-  ws._delStack("focusStack", 7);
-  assert.deepStrictEqual(ws._waitMsgArray, [["transition", 7]]);
-
-  const own = function () {};
-  const p2 = { _isStack: own, _delStack: own };
-  assert.strictEqual(S.apply(conf(), env([], null, p2)).wsfix, false);
-  assert.strictEqual(p2._isStack, own);
-
-  const p3 = {};
-  assert.strictEqual(S.apply(conf({ wsfix: false }), env([], null, p3)).wsfix, false);
-  assert.strictEqual(p3._isStack, undefined);
+  const p1 = {};
+  assert.strictEqual(S.apply(conf(), env([], null, p1)).wsfix, false);
+  assert.strictEqual(p1._isStack, undefined);
+  assert.strictEqual(p1._delStack, undefined);
 }
 
-// conf missing or out of range -> defaults (300 / warn / on)
+// conf missing or out of range -> defaults (300 / warn)
 {
   const a = rule(".Transitions_x", "600ms", "0ms");
   const lv = { __global__: 2 };
   const r = S.apply(undefined, env([{ cssRules: [a] }], lv, {}));
-  assert.deepStrictEqual([a.v["animation-duration"], lv.__global__, r.wsfix], ["300ms", 3, true]);
+  assert.deepStrictEqual([a.v["animation-duration"], lv.__global__, r.wsfix], ["300ms", 3, false]);
   const b = rule(".Transitions_x", "600ms", "0ms");
   S.apply({ animMs: 5000, logs: "warn", wsfix: true }, env([{ cssRules: [b] }]));
   assert.strictEqual(b.v["animation-duration"], "300ms", "out-of-range animMs falls back to 300");
