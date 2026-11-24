@@ -1,11 +1,11 @@
 {
   "formatVersion": 1,
-  "name": "cmu-re-speedup",
+  "name": "cmu-re-gui-speedup",
   "version": "0.0.0",
   "author": "CMU-Revised",
   "targetCMU": "74.00.324A",
   "category": "System mods",
-  "description": "Makes the factory screen feel faster: shorter screen-change animations (you pick the time), fewer GUI log writes, and a fix for a message-handler error in the stock HMI. Changes nothing on the system: the tweaks run inside the HMI at start-up. Uninstall and restart to get the stock behaviour back.",
+  "description": "Makes the factory screen feel faster: shorter screen-change animations (you pick the time) and fewer GUI log writes. Changes nothing on the system: the tweaks run inside the HMI at start-up. Uninstall and restart to get the stock behaviour back.",
   "minDaemon": "0.1.0",
   "depends": "cmu-re-store (>= 0.7.0.2)",
   "conflicts": "",

@@ -1,1 +1,1 @@
-{"apiVersion":1,"entries":[{"id":"speedup","section":"none","label":"Speed-up","main":"main.js","listen":true}]}
+{"apiVersion":1,"entries":[{"id":"gui-speedup","section":"none","label":"GUI speed-up","main":"main.js","listen":true}]}

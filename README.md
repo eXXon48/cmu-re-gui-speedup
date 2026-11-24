@@ -1,9 +1,9 @@
-# cmu-re-speedup (Speed-up)
+# cmu-re-gui-speedup (GUI speed-up)
 
 **A faster-feeling factory screen on the Mazda CMU150 (firmware 74.00.324A).**
 
 A background HMI mod. It changes no system file: `ui/main.js` runs inside the HMI at start-up
-(loaded by the Revised Store's `sdk.js`) and makes three run-time changes:
+(loaded by the Revised Store's `sdk.js`) and makes two run-time changes:
 
 1. **Screen-change animations.** Scales the `animation-duration` and `animation-delay` of the
    `.Transitions_*` CSS rules. The setting is the new length of the longest stock transition
@@ -11,10 +11,6 @@ A background HMI mod. It changes no system file: `ui/main.js` runs inside the HM
    The timer that ends the slide transitions is scaled by the same factor.
 2. **GUI log level.** Raises the global gate of the GUI logger. Calls below the gate return
    before the stack capture and the native log write. Errors are always logged.
-3. **Message handler fix (disabled).** The stock MMUI WebSocket handler calls two helpers as
-   methods that exist only as global functions, so it can throw and skip the rest of the
-   message. The fix (define them on the prototype) is in the code but switched off: the bench
-   unit logged no such error. It comes back if the HMI log shows them.
 
 ## Settings
 
@@ -39,7 +35,7 @@ sh test/run.sh    # manifest + hmi.json parse, ES5 grep, main.js against stub gl
 ## Build
 
 ```sh
-sh tools/mkpkg.sh <version> <path/to/rvp-pack> cmu-re-speedup-<version>.rvp
+sh tools/mkpkg.sh <version> <path/to/rvp-pack> cmu-re-gui-speedup-<version>.rvp
 ```
 
 `rvp-pack` comes from the Revised Store repo and must support manifest `config`. Releases: push
@@ -55,14 +51,15 @@ Local HMI sim (desktop Opera 12.10, Presto 2.12.388, stock-HMI stub), 2026-11-19
   reads the value back in seconds (`0.15s`); no fallback sheet needed. Test rules scaled at
   300 ms: `300ms → 150ms`, `0.6s → 300ms`, delay `0ms` stays `0`.
 - Log gate set to 3.
-- Settings change (50 ms / Critical / fix off) regenerates `conf.js`; the next page start
+- Settings change (50 ms / Critical) regenerates `conf.js`; the next page start
   reads the new values.
 - Uninstall removes the jail and the registry entry; the next page start has no mod globals.
 
-The sim has no stock transition CSS, GUI logger or MMUI WebSocket, so the real rule count and
+The sim has no stock transition CSS or GUI logger, so the real rule count and
 the timing numbers come from the bench.
 
-Bench unit (74.00.324A EU, store 0.7.0.2, v0.1.0 from the dev catalog), 2026-11-20:
+Bench unit (74.00.324A EU, store 0.7.0.2, v0.1.0 from the dev catalog, then named
+`cmu-re-speedup`), 2026-11-20:
 
 - Status line at HMI start: `speedup anim=47 rules (300 ms), timer=true, gate=3, wsfix=false`.
 - Timing: 10 enter/back pairs on Communication from the home screen, start of

@@ -64,13 +64,13 @@ jobs:
 
       - name: Pack Revised Store package
         run: |
-          sh tools/mkpkg.sh "$VER" store/target/release/rvp-pack "cmu-re-speedup-$VER.rvp"
-          sha256sum "cmu-re-speedup-$VER.rvp" | tee "cmu-re-speedup-$VER.rvp.sha256"
+          sh tools/mkpkg.sh "$VER" store/target/release/rvp-pack "cmu-re-gui-speedup-$VER.rvp"
+          sha256sum "cmu-re-gui-speedup-$VER.rvp" | tee "cmu-re-gui-speedup-$VER.rvp.sha256"
 
       - name: Attach package to release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: ${{ startsWith(github.ref, 'refs/tags/dev/v') }}
           files: |
-            cmu-re-speedup-${{ env.VER }}.rvp
-            cmu-re-speedup-${{ env.VER }}.rvp.sha256
+            cmu-re-gui-speedup-${{ env.VER }}.rvp
+            cmu-re-gui-speedup-${{ env.VER }}.rvp.sha256

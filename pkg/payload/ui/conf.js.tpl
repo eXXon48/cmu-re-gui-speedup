@@ -1,1 +1,1 @@
-window.RevisedSpeedupConf = { animMs: {{ anim_ms }}, logs: "{{ logs }}" };
+window.RevisedGuiSpeedupConf = { animMs: {{ anim_ms }}, logs: "{{ logs }}" };

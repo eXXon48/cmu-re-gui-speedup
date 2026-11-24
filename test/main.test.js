@@ -21,13 +21,12 @@ function rule(sel, dur, delay) {
     setProperty: (p, x) => { v[p] = x; },
   }, v };
 }
-function env(sheets, levels, proto) {
-  return { document: { styleSheets: sheets }, log: { _logLevels: levels || { __global__: 2 } },
-           Websockets: proto ? { prototype: proto } : undefined };
+function env(sheets, levels) {
+  return { document: { styleSheets: sheets }, log: { _logLevels: levels || { __global__: 2 } } };
 }
-const conf = (o) => Object.assign({ animMs: 300, logs: "warn", wsfix: true }, o);
+const conf = (o) => Object.assign({ animMs: 300, logs: "warn" }, o);
 
-const S = load().RevisedSpeedup;
+const S = load().RevisedGuiSpeedup;
 
 // scaleMs
 assert.strictEqual(S.scaleMs(600, 300), 300);
@@ -50,7 +49,7 @@ assert.strictEqual(S.gate("bogus"), 3);
   const b = rule(".Other", "300ms", "0ms");
   const c = rule(".Transitions_slide_0_400", "0.4s", "0ms");
   const bad = {}; Object.defineProperty(bad, "cssRules", { get() { throw new Error("denied"); } });
-  const r = S.apply(conf(), env([bad, { cssRules: [a, b] }, { cssRules: [c] }], null, {}));
+  const r = S.apply(conf(), env([bad, { cssRules: [a, b] }, { cssRules: [c] }]));
   assert.strictEqual(r.anim, 2);
   assert.deepStrictEqual([a.v["animation-duration"], a.v["animation-delay"]], ["150ms", "150ms"]);
   assert.strictEqual(b.v["animation-duration"], "300ms", "non-transition rule untouched");
@@ -66,26 +65,17 @@ assert.strictEqual(S.gate("bogus"), 3);
   assert.strictEqual(lv.__global__, 4);
 }
 
-// wsfix is disabled (no _isStack TypeError seen on the bench): apply never touches Websockets
-{
-  const p1 = {};
-  assert.strictEqual(S.apply(conf(), env([], null, p1)).wsfix, false);
-  assert.strictEqual(p1._isStack, undefined);
-  assert.strictEqual(p1._delStack, undefined);
-}
-
 // conf missing or out of range -> defaults (300 / warn)
 {
   const a = rule(".Transitions_x", "600ms", "0ms");
   const lv = { __global__: 2 };
-  const r = S.apply(undefined, env([{ cssRules: [a] }], lv, {}));
-  assert.deepStrictEqual([a.v["animation-duration"], lv.__global__, r.wsfix], ["300ms", 3, false]);
+  const r = S.apply(undefined, env([{ cssRules: [a] }], lv));
+  assert.deepStrictEqual([a.v["animation-duration"], lv.__global__, r.logs], ["300ms", 3, 3]);
   const b = rule(".Transitions_x", "600ms", "0ms");
-  S.apply({ animMs: 5000, logs: "warn", wsfix: true }, env([{ cssRules: [b] }]));
+  S.apply({ animMs: 5000, logs: "warn" }, env([{ cssRules: [b] }]));
   assert.strictEqual(b.v["animation-duration"], "300ms", "out-of-range animMs falls back to 300");
 }
 
-console.log("main.test.js ok");
 
 // timer cleanup (UMP slides) scaled with the CSS, so it never fires mid-animation
 {
@@ -111,7 +101,7 @@ console.log("main.test.js ok");
     log: { _logLevels: levels },
     RevisedHMI: { log: (m) => { logged = [m, levels.__global__]; } },
   });
-  g.RevisedSpeedupConf = { animMs: 300, logs: "error", wsfix: true };
+  g.RevisedGuiSpeedupConf = { animMs: 300, logs: "error" };
   script.onload();
   assert.ok(logged, "status line logged");
   assert.strictEqual(logged[1], 2, "logged while the gate was still stock");
